@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "learnxplorer"
-version = "0.1.1"
+version = "0.1.2"
 description = ""
 authors = ["Krystian Hankus <krystianh16@gmail.com>"]
 
