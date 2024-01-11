@@ -1,11 +1,11 @@
 [tool.poetry]
-name = "python-template"
+name = "learnxplorer"
 version = "0.1.0"
 description = ""
-authors = ["Your Name <you@example.com>"]
+authors = ["Krystian Hankus <krystianh16@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = ">=3.10.0,<3.11"
+python = "3.10.12"
 flask = "^3.0.0"
 functions = "^0.7.0"
 openai = "^1.2.3"
