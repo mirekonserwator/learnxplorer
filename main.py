@@ -5,48 +5,51 @@ from flask import Flask, request, jsonify
 import openai
 from openai import OpenAI
 import functions
+from wolframalpha import Client as WolframAlphaClient
 
-# Check OpenAI version is correct
+
 required_version = version.parse("1.1.1")
 current_version = version.parse(openai.__version__)
 OPENAI_API_KEY = os.environ['OPENAI_API_KEY']
+WOLFRAM_ALPHA_APP_ID = os.environ['WOLFRAM_ALPHA_APP_ID']
+wolfram_client = WolframAlphaClient(WOLFRAM_ALPHA_APP_ID)
 if current_version < required_version:
   raise ValueError(f"Error: OpenAI version {openai.__version__}"
                    " is less than the required version 1.1.1")
 else:
   print("OpenAI version is compatible.")
 
-# Start Flask app
+
 app = Flask(__name__)
 
-# Init client
-client = OpenAI(
-    api_key=OPENAI_API_KEY)  # should use env variable OPENAI_API_KEY in secrets (bottom left corner)
 
-# Create new assistant or load existing
+client = OpenAI(
+    api_key=OPENAI_API_KEY)
+
+
 assistant_id = functions.create_assistant(client)
 
-# Start conversation thread
+
 @app.route('/start', methods=['GET'])
 def start_conversation():
-  print("Starting a new conversation...")  # Debugging line
+  print("Starting a new conversation...")  
   thread = client.beta.threads.create()
-  print(f"New thread created with ID: {thread.id}")  # Debugging line
+  print(f"New thread created with ID: {thread.id}") 
   return jsonify({"thread_id": thread.id})
 
-# Generate response
+
 @app.route('/chat', methods=['POST'])
 def chat():
   data = request.json
   thread_id = data.get('thread_id')
   user_input = data.get('message', '')
-
+  
   if not thread_id:
-    print("Error: Missing thread_id")  # Debugging line
+    print("Error: Missing thread_id")
     return jsonify({"error": "Missing thread_id"}), 400
 
   print(f"Received message: {user_input} for thread ID: {thread_id}"
-        )  # Debugging line
+        )
 
   # Add the user's message to the thread
   client.beta.threads.messages.create(thread_id=thread_id,
@@ -76,4 +79,3 @@ def chat():
 # Run server
 if __name__ == '__main__':
   app.run(host='0.0.0.0', port=8080)
-
