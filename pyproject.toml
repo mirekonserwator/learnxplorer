@@ -5,7 +5,7 @@ description = ""
 authors = ["Krystian Hankus <krystianh16@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "3.10.12"
+python = "3.10.0"
 flask = "^3.0.0"
 functions = "^0.7.0"
 openai = "^1.2.3"
