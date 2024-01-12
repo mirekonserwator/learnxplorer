@@ -11,7 +11,8 @@ current_version = version.parse(openai.__version__)
 OPENAI_API_KEY = os.environ['OPENAI_API_KEY']
 
 if current_version < required_version:
-    raise ValueError(f"Error: OpenAI version {openai.__version__} is less than the required version 1.1.1")
+    raise ValueError(f"Error: OpenAI version {openai.__version__}"
+                     " is less than the required version 1.1.1")
 else:
     print("OpenAI version is compatible.")
 
@@ -45,22 +46,27 @@ def chat():
                                         role="user",
                                         content=user_input)
 
-    # Zwiększenie limitu czasu na 60 sekund
-    timeout_seconds = 60
-
     # Run the Assistant
-    run = functions.create_run(client, thread_id, assistant_id)
+    run = client.beta.threads.runs.create(thread_id=thread_id,
+                                          assistant_id=assistant_id)
 
-    # Czekaj, aż run zostanie zakończony lub limit czasu upłynie
-    functions.wait_for_run_completion(client, thread_id, run.id, timeout_seconds)
+    # Check if the Run requires action (function call)
+    while True:
+        run_status = client.beta.threads.runs.retrieve(thread_id=thread_id,
+                                                       run_id=run.id)
+        print(f"Run status: {run_status.status}")
+        if run_status.status == 'completed':
+            break
+        sleep(1)  # Wait for a second before checking again
 
-    # Pobierz i zwróć najnowszą wiadomość od asystenta
-    response = functions.get_assistant_response(client, thread_id)
+    # Retrieve and return the latest message from the assistant
+    messages = client.beta.threads.messages.list(thread_id=thread_id)
+    response = messages.data[0].content[0].text.value
 
     print(f"Assistant response: {response}")  # Debugging line
     return jsonify({"response": response})
 
-# Uruchom serwer
+# Run server
 if __name__ == '__main__':
     app.run()
 
